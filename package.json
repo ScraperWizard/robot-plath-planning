@@ -1,0 +1,19 @@
+{
+  "name": "robotics_plath_planning",
+  "version": "1.0.0",
+  "description": "This cpp service is responsible for robot path planning, it handles the state and commands the robot to move where",
+  "main": "index.js",
+  "scripts": {
+    "prebuild": "rimraf build",
+    "build": "tsc && node build/src/main.js",
+    "test": "tsc && node build/test/UnitTest/test.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "astar-typescript": "^1.2.7",
+    "canvas": "^2.11.2",
+    "express": "^4.18.2",
+    "socket.io": "^4.7.4"
+  }
+}
