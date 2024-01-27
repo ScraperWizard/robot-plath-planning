@@ -148,6 +148,8 @@ class Arena {
     if (angle == RobotLookingAngles.LEFT) {
       return new ArenaCoordinate(minX, Math.floor((minY + maxY) / 2));
     }
+
+    return new ArenaCoordinate(minX, Math.floor((minY + maxY) / 2));
   }
 
   createGrid(): void {
@@ -276,8 +278,8 @@ class Arena {
     return false;
   }
 
-  getClosestItem(ItemType: ItemsTypes): Item {
-    let closestItem: Item = null;
+  getClosestItem(ItemType: ItemsTypes): Item | null {
+    let closestItem: Item | null = null;
     let closestDistance: number = 100000;
 
     for (let i = 0; i < this.items.length; i++) {
@@ -296,8 +298,8 @@ class Arena {
     return closestItem;
   }
 
-  getFarthestItem(ItemType: ItemsTypes): Item {
-    let farthestItem: Item = null;
+  getFarthestItem(ItemType: ItemsTypes): Item | null {
+    let farthestItem: Item | null = null;
     let farthestDistance: number = 0;
 
     for (let i = 0; i < this.items.length; i++) {

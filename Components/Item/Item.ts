@@ -1,4 +1,4 @@
-import { ArenaCoordinate } from "Components/Arena/types";
+import { ArenaCoordinate } from "../Arena/types.js";
 import { ItemSize, ItemsTypes } from "./types";
 
 class Item {

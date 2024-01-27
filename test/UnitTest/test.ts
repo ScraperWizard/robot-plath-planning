@@ -116,7 +116,7 @@ if (VirtualArena.containsItem(ItemsTypes.Obstacle)) {
   console.log("Arena has obstacle");
 }
 
-const goal: Item = VirtualArena.getFarthestItem(ItemsTypes.Trash);
+const goal: Item | null = VirtualArena.getFarthestItem(ItemsTypes.Trash);
 
 console.log("Our current goal (Fathest item): ", goal);
 
