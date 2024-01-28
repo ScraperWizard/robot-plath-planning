@@ -12,13 +12,13 @@ const numberOfRowsArena: number = 10;
 const numberOfColsArena: number = 8;
 const SizeOfRobot: number = 2;
 const ViewAngleOfRobot: number = 180;
-const ViewDistanceOfRobot: number = 4;
+const ViewDistanceOfRobot: number = 2;
 
 const VirtualArena: Arena = new Arena(numberOfColsArena, numberOfRowsArena);
 
 const robot: Robot = new Robot({
   size: SizeOfRobot, // Size factor of the robot
-  lookingAngle: RobotLookingAngles.UP, // Angle at which the robot is looking
+  lookingAngle: RobotLookingAngles.RIGHT, // Angle at which the robot is looking
   viewOfAngle: ViewAngleOfRobot, // View of angle of the robot
   viewOfDistance: ViewDistanceOfRobot, // View of distance of the robot
 });

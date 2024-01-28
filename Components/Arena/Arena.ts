@@ -95,7 +95,6 @@ class Arena {
         let v = cellX - x;
         let b = y - cellY;
         let c = Math.atan2(b, v) * (180 / Math.PI);
-
         if (c <= 0) {
           c = Math.abs(c) + 90;
         } else {
@@ -106,7 +105,18 @@ class Arena {
           }
         }
 
-        c -= Robot.getLookingAngle();
+
+        //adjust the value of c relative to the robot angle
+        let fullCircle=360
+        let c1=Math.abs(c-Robot.getLookingAngle());
+        let c2= Math.abs(fullCircle-c+Robot.getLookingAngle())
+        c =Math.min(c1,c2);
+
+        //adjust the value of 
+        if (c>180){
+          c-=360
+        }
+      
 
         const angle = Robot.getViewOfAngle();
         let midAngle = angle / 2;
