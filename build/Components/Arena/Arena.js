@@ -80,6 +80,10 @@ class Arena {
                 let v = cellX - x;
                 let b = y - cellY;
                 let c = Math.atan2(b, v) * (180 / Math.PI);
+                // console.log(cell.getX(),cell.getY())
+                // console.log(b,v)
+                // console.log(c)
+                console.log(robotPositionReference);
                 if (c <= 0) {
                     c = Math.abs(c) + 90;
                 }
@@ -91,7 +95,14 @@ class Arena {
                         c = 360 - (c - 90);
                     }
                 }
-                c -= Robot.getLookingAngle();
+                let fullCircle = 360;
+                let c1 = Math.abs(c - Robot.getLookingAngle());
+                let c2 = Math.abs(fullCircle - c + Robot.getLookingAngle());
+                c = Math.min(c1, c2);
+                if (c > 180) {
+                    c -= 360;
+                }
+                // console.log(c)
                 const angle = Robot.getViewOfAngle();
                 let midAngle = angle / 2;
                 const distance = Math.sqrt(Math.pow(cellX - x, 2) + Math.pow(cellY - y, 2));
