@@ -1,4 +1,4 @@
-import { ArenaCoordinate } from "Components/Arena/types";
+import { ArenaCoordinate } from "../../Components/Arena/types";
 import { RobotLookingAngles } from "./types";
 
 class Robot {

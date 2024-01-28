@@ -39,8 +39,8 @@ class Arena {
         const x = i - Math.floor(robotSize / 2 + adjustmentX);
         const y = j - Math.floor(robotSize / 2 + adjustmentY);
 
-        this.getGridItem(x, y).addItem(Robot);
-        newRobotCoordinate.push(new ArenaCoordinate(x, y));
+        this.grid[y][x].addItem(Robot);
+        newRobotCoordinate.push(new ArenaCoordinate(y, x));
       }
     }
 
@@ -85,13 +85,13 @@ class Arena {
     const robotPositionReference = this.getArenaCoordinateAtAngle(this.robot.getPosition(), this.robot.getLookingAngle());
     const x = robotPositionReference.getY();
     const y = robotPositionReference.getX();
-    console.log(robotPositionReference);
+    console.log(robotPositionReference, this.robot.getPosition());
 
-    for (let j = 0; j < this.grid.length; j++) {
-      for (let k = 0; k < this.grid[j].length; k++) {
-        const cell = this.grid[j][k];
-        const cellX = cell.getY();
-        const cellY = cell.getX();
+    for (let i = 0; i < this.grid.length; i++) {
+      for (let j = 0; j < this.grid[i].length; j++) {
+        const cell = this.grid[i][j];
+        const cellX = j;
+        const cellY = i;
         let v = cellX - x;
         let b = y - cellY;
         let c = Math.atan2(b, v) * (180 / Math.PI);
@@ -114,6 +114,9 @@ class Arena {
         const distance = Math.sqrt(Math.pow(cellX - x, 2) + Math.pow(cellY - y, 2));
 
         if (distance <= distanceOfView && Math.abs(c) <= midAngle) {
+          if(!cell.getHasItem()) {
+            console.log(cell)
+          }
           cell.setIsVisited(true);
         }
       }
@@ -210,16 +213,18 @@ class Arena {
   }
 
   displayGrid(): void {
-    let header = "  ";
+
+    let header = "xy";
     for (let i = 0; i < this.grid[0].length; i++) {
       header += i.toString().padStart(2) + " ";
     }
 
-    console.log(header);
+    console.log('\x1b[34m%s\x1b[0m', header);
 
-    for (let i = 0; i < this.grid.length; i++) {
-      let row = i.toString().padStart(2) + " ";
-      for (let j = 0; j < this.grid[i].length; j++) {
+    for(let i = 0; i < this.grid.length; i++) {
+      let row = "";
+      row += '\x1b[34m' + i.toString().padEnd(2) + '\x1b[0m' + " ";
+      for(let j = 0; j < this.grid[i].length; j++) {
         const cell = this.grid[i][j];
         const isVisited = cell.getIsVisited();
         const hasItem = cell.getHasItem();
@@ -232,7 +237,7 @@ class Arena {
         }
         row += cellStr.padEnd(2) + " ";
       }
-      console.log(row);
+      console.log(row)
     }
   }
 
