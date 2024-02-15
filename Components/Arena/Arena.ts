@@ -5,19 +5,21 @@ import Cell from "./Cell";
 import RobotViewItem from "../Robot/RobotView";
 import ArenaCoordinate from "./ArenaCoordinate";
 import { EventTypes, Event } from "../Events/types";
-import { ItemsTypes } from "../Item/types";
+import { ItemSize, ItemsTypes } from "../Item/types";
 import { RobotLookingAngles } from "../Robot/types";
 import { ArenaProps } from "./types";
 
 class Arena {
   private plotted: Boolean = false;
-  private items: Array<Item> = [];
-  private robot: Robot;
+  public items: Array<Item> = [];
+  private robot: Robot = null;
   private allEvents: Array<EventsStack> = [];
   private isTrackingEvents: Boolean = false;
   private length: number;
   private width: number;
   private grid: Array<Array<Cell>> = [];
+  private isDisplayingLiveGrid: Boolean = false;
+  private liveGridText: string = "";
 
   constructor(length: number, width: number) {
     this.length = length;
@@ -46,7 +48,6 @@ class Arena {
 
     Robot.setPosition(newRobotCoordinate);
     this.robot = Robot;
-    this.markCellsAsVisitedInView(Robot);
   }
 
   plotItemByXY(coordinate: ArenaCoordinate, item: Item): void {
@@ -56,7 +57,7 @@ class Arena {
       const startY = coordinate.getY();
       const adjustmentX = itemSize % 2 === 0 ? -0.5 : 0;
       const adjustmentY = itemSize % 2 === 0 ? -0.5 : 0;
-  
+
       const newItemCoordinate: Array<ArenaCoordinate> = [];
 
       for (let i = startX; i < startX + itemSize && i < this.grid.length; i++) {
@@ -64,8 +65,8 @@ class Arena {
           const x = i - Math.floor(itemSize / 2 + adjustmentX);
           const y = j - Math.floor(itemSize / 2 + adjustmentY);
 
-          this.getGridItem(x, y).addItem(item);
-          newItemCoordinate.push(new ArenaCoordinate(x, y));
+          this.grid[y][x].addItem(item);
+          newItemCoordinate.push(new ArenaCoordinate(y, x));
         }
       }
 
@@ -80,12 +81,11 @@ class Arena {
     return this.grid[y][x];
   }
 
-  markCellsAsVisitedInView(Robot: Robot): void {
+  markCellsAsVisitedInViewOfRobot(Robot: Robot): void {
     const distanceOfView = Robot.getViewOfDistance();
     const robotPositionReference = this.getArenaCoordinateAtAngle(this.robot.getPosition(), this.robot.getLookingAngle());
     const x = robotPositionReference.getY();
     const y = robotPositionReference.getX();
-    console.log(robotPositionReference, this.robot.getPosition());
 
     for (let i = 0; i < this.grid.length; i++) {
       for (let j = 0; j < this.grid[i].length; j++) {
@@ -105,18 +105,16 @@ class Arena {
           }
         }
 
-
         //adjust the value of c relative to the robot angle
-        let fullCircle=360
-        let c1=Math.abs(c-Robot.getLookingAngle());
-        let c2= Math.abs(fullCircle-c+Robot.getLookingAngle())
-        c =Math.min(c1,c2);
+        let fullCircle = 360;
+        let c1 = Math.abs(c - Robot.getLookingAngle());
+        let c2 = Math.abs(fullCircle - c + Robot.getLookingAngle());
+        c = Math.min(c1, c2);
 
-        //adjust the value of 
-        if (c>180){
-          c-=360
+        //adjust the value of
+        if (c > 180) {
+          c -= 360;
         }
-      
 
         const angle = Robot.getViewOfAngle();
         let midAngle = angle / 2;
@@ -124,9 +122,6 @@ class Arena {
         const distance = Math.sqrt(Math.pow(cellX - x, 2) + Math.pow(cellY - y, 2));
 
         if (distance <= distanceOfView && Math.abs(c) <= midAngle) {
-          if(!cell.getHasItem()) {
-            console.log(cell)
-          }
           cell.setIsVisited(true);
         }
       }
@@ -222,19 +217,22 @@ class Arena {
     }
   }
 
-  displayGrid(): void {
+  setLiveGridText(text: string): void {
+    this.liveGridText = text;
+  }
 
+  displayGrid(): void {
     let header = "xy";
     for (let i = 0; i < this.grid[0].length; i++) {
       header += i.toString().padStart(2) + " ";
     }
 
-    console.log('\x1b[34m%s\x1b[0m', header);
+    console.log("\x1b[34m%s\x1b[0m", header);
 
-    for(let i = 0; i < this.grid.length; i++) {
+    for (let i = 0; i < this.grid.length; i++) {
       let row = "";
-      row += '\x1b[34m' + i.toString().padEnd(2) + '\x1b[0m' + " ";
-      for(let j = 0; j < this.grid[i].length; j++) {
+      row += "\x1b[34m" + i.toString().padEnd(2) + "\x1b[0m" + " ";
+      for (let j = 0; j < this.grid[i].length; j++) {
         const cell = this.grid[i][j];
         const isVisited = cell.getIsVisited();
         const hasItem = cell.getHasItem();
@@ -245,15 +243,57 @@ class Arena {
         } else {
           cellStr = isVisited ? "X" : "O";
         }
-        row += cellStr.padEnd(2) + " ";
+        let outputString = "";
+        if (cellStr == "X") {
+          outputString += "\x1b[31m" + cellStr.padEnd(2) + "\x1b[0m";
+        } else if (cellStr == "1") {
+          outputString += "\x1b[33m" + cellStr.padEnd(2) + "\x1b[0m";
+        } else if (cellStr == "R") {
+          outputString += "\x1b[32m" + cellStr.padEnd(2) + "\x1b[0m";
+        } else {
+          outputString += cellStr.padEnd(2);
+        }
+
+        outputString += " ";
+        row += outputString;
       }
-      console.log(row)
+      console.log(row);
     }
   }
 
+  updateLiveGrid(): void {
+    if (!this.isDisplayingLiveGrid) {
+      return;
+    }
+    console.clear();
+    this.displayGrid();
+  }
+
+  async displayLiveGrid(refershRate: number): Promise<void> {
+    if (this.isDisplayingLiveGrid) {
+      return;
+    }
+
+    this.isDisplayingLiveGrid = true;
+
+    while (this.isDisplayingLiveGrid) {
+      console.clear();
+      console.log(this.liveGridText);
+      this.displayGrid();
+      await sleep(refershRate);
+    }
+
+    async function sleep(ms: number) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+  }
+
+  stopDisplayingLiveGrid(): void {
+    this.isDisplayingLiveGrid = false;
+  }
+
   addItemByView(View: RobotViewItem): void {
-    const item: Item = new Item(View.getType());
-    const robotPosition: Array<ArenaCoordinate> = this.robot.getPosition();
+    const item: Item = new Item(View.getType(), ItemSize.SMALL);
     const shiftedPosition: Array<ArenaCoordinate> = [];
 
     if (this.robot.getLookingAngle() + View.getAngle() < 90) {
@@ -262,17 +302,16 @@ class Arena {
       View.setAngle(360 - (View.getAngle() + this.robot.getLookingAngle() - 90));
     }
 
+    console.log("View angle", View.getAngle());
+
     const robotPositionReference = this.getArenaCoordinateAtAngle(this.robot.getPosition(), this.robot.getLookingAngle());
+    console.log("reference point", robotPositionReference);
 
     try {
       const newPosition = new ArenaCoordinate(robotPositionReference.getX(), robotPositionReference.getY());
       newPosition.rotateAndShiftItemByView(View);
-      this.getGridItem(newPosition.getX(), newPosition.getY()).addItem(item);
-      shiftedPosition.push(new ArenaCoordinate(newPosition.getX(), newPosition.getY()));
-
-      // if(this.grid[newPosition.getY()][newPosition.getX()].getHasItem()) {
-      //   throw new Error("Item already exists");
-      // }
+      this.grid[newPosition.getX()][newPosition.getY()].addItem(item);
+      shiftedPosition.push(new ArenaCoordinate(newPosition.getY(), newPosition.getX()));
     } catch (err) {
       console.log("Couldn't add item", err);
       return;
@@ -343,10 +382,10 @@ class Arena {
   getUnvisitedGrid(): number[][] {
     const grid: number[][] = [];
 
-    for (let i = 0; i < this.grid.length; i++) {
+    for (let i = 0; i < this.getWidth(); i++) {
       grid.push([]);
-      for (let j = 0; j < this.grid[i].length; j++) {
-        grid[i].push(this.grid[i][j].getIsVisited() ? 0 : 1);
+      for (let j = 0; j < this.getHeight(); j++) {
+        grid[i].push(this.grid[j][i].getIsWalkable() ? 0 : 1);
       }
     }
 
@@ -359,6 +398,68 @@ class Arena {
 
   containsProp(prop: ArenaProps): Boolean {
     return true;
+  }
+
+  moveRobotForward(distance: number): void {
+    for (let i = 0; i < distance; i++) {
+      for (let i = 0; i < this.robot.getPosition().length; i++) {
+        this.grid[this.robot.getPosition()[i].getY()][this.robot.getPosition()[i].getX()].removeItem();
+      }
+
+      try {
+        this.robot.moveForward(1);
+      } catch (err) {
+        if (err.message == "Out of bounds") {
+          throw new Error("Out of bounds");
+        } else {
+          throw err;
+        }
+      }
+
+      this.markCellsAsVisitedInViewOfRobot(this.robot);
+      this.updateLiveGrid();
+
+      for (let i = 0; i < this.robot.getPosition().length; i++) {
+        this.grid[this.robot.getPosition()[i].getY()][this.robot.getPosition()[i].getX()].addItem(this.robot);
+      }
+    }
+  }
+
+  getWidth(): number {
+    return this.grid[0].length;
+  }
+
+  getHeight(): number {
+    return this.grid.length;
+  }
+
+  getGrid(): Array<Array<Cell>> {
+    return this.grid;
+  }
+
+  setRobot(robot: Robot): void {
+    this.robot = robot;
+  }
+
+  getDistanceBetweenCells(cell1: Cell, cell2: Cell): number {
+    return Math.sqrt(Math.pow(cell1.getX() - cell2.getX(), 2) + Math.pow(cell1.getY() - cell2.getY(), 2));
+  }
+
+  getClosestVisitedCell(item: Item): Cell {
+    let closestCell: Cell = null;
+    let closestDistance: number = 100000;
+    const itemCell: Cell = this.grid[item.getPointCoordinate().y][item.getPointCoordinate().x];
+    
+    for(let i = 0; i < this.grid.length; i++) {
+      for(let j = 0; j < this.grid[i].length; j++) {
+        const cell = this.grid[j][i];
+        if(cell.getIsVisited() && !cell.getHasItem() && this.getDistanceBetweenCells(cell, itemCell) < closestDistance) {
+          closestCell =  cell;
+        }
+      }
+    }
+
+    return closestCell;
   }
 }
 

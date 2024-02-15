@@ -12,7 +12,7 @@ var ItemsTypes;
 var ItemSize;
 (function (ItemSize) {
     ItemSize[ItemSize["SMALL"] = 1] = "SMALL";
-    ItemSize[ItemSize["MEDIUM"] = 12] = "MEDIUM";
+    ItemSize[ItemSize["MEDIUM"] = 4] = "MEDIUM";
     ItemSize[ItemSize["LARGE"] = 30] = "LARGE";
 })(ItemSize || (exports.ItemSize = ItemSize = {}));
 //# sourceMappingURL=types.js.map

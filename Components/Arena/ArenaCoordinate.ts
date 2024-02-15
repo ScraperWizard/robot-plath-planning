@@ -9,6 +9,14 @@ class ArenaCoordinate {
     this.y = y;
   }
 
+  setX(x: number) {
+    this.x = x;
+  }
+
+  setY(y: number) {
+    this.y = y;
+  }
+
   getX() {
     return Math.floor(this.x);
   }
@@ -39,16 +47,19 @@ class ArenaCoordinate {
     const angleInRadians = (angleToBeShifted * Math.PI) / 180; // Convert angle to radians
 
     // Shift coordinates clockwise
-    let xShifted = distanceToBeShifted * Math.cos(angleInRadians);
-    let yShifted = (distanceToBeShifted * Math.sin(angleInRadians)) * -1;
+    let yShifted = distanceToBeShifted * Math.cos(angleInRadians);
+    let xShifted = distanceToBeShifted * Math.sin(angleInRadians) * -1;
 
-    if(xShifted > 0) {
+    xShifted = Math.round(xShifted);
+    yShifted = Math.round(yShifted);
+
+    if (xShifted > 0) {
       xShifted = Math.ceil(xShifted);
     } else {
       xShifted = Math.floor(xShifted);
     }
 
-    if(yShifted > 0) {
+    if (yShifted > 0) {
       yShifted = Math.ceil(yShifted);
     } else {
       yShifted = Math.floor(yShifted);

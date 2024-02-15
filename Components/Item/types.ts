@@ -12,7 +12,7 @@ interface ItemsLocator {
 
 enum ItemSize {
     SMALL = 1,
-    MEDIUM = 12,
+    MEDIUM = 4,
     LARGE = 30
 }
 

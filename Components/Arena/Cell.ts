@@ -1,5 +1,6 @@
-import { Item } from "Components/Item/Item";
-import Robot from "Components/Robot/Robot";
+import { Item } from "../../Components/Item/Item";
+import { ItemsTypes } from "../../Components/Item/types";
+import Robot from "../../Components/Robot/Robot";
 
 class Cell {
     private x: number;
@@ -25,6 +26,16 @@ class Cell {
         return this.isVisited;
     }
 
+    getIsWalkable(): Boolean {
+        if(this.hasItem) {
+            if(this.getHasItem() && this.getItem().getType() == ItemsTypes.Obstacle) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public setIsVisited(isVisited: Boolean): void {
         this.isVisited = isVisited;
     }
@@ -46,6 +57,10 @@ class Cell {
 
     public getItem(): Item | Robot {
         return this.Item;
+    }
+
+    public visit(): void {
+        this.isVisited = true;
     }
 }
 

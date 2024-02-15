@@ -6,8 +6,9 @@ class Item {
   private type: ItemsTypes;
   private size: ItemSize;
 
-  constructor(type: ItemsTypes) {
+  constructor(type: ItemsTypes, size: ItemSize) {
     this.type = type;
+    this.size = size;
   }
 
   public getPosition(): Array<ArenaCoordinate> {
@@ -16,7 +17,6 @@ class Item {
 
   getPointCoordinate() {
     const coord: ArenaCoordinate = this.position[Math.floor(this.position.length / 2)];
-    console.log(coord, this.position.length)
 
     return {
       x: coord.getX(),

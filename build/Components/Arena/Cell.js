@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const types_1 = require("../../Components/Item/types");
 class Cell {
     constructor(x, y) {
         this.isVisited = false;
@@ -15,6 +16,14 @@ class Cell {
     }
     getIsVisited() {
         return this.isVisited;
+    }
+    getIsWalkable() {
+        if (this.hasItem) {
+            if (this.getHasItem() && this.getItem().getType() == types_1.ItemsTypes.Obstacle) {
+                return false;
+            }
+        }
+        return true;
     }
     setIsVisited(isVisited) {
         this.isVisited = isVisited;
@@ -33,6 +42,9 @@ class Cell {
     }
     getItem() {
         return this.Item;
+    }
+    visit() {
+        this.isVisited = true;
     }
 }
 exports.default = Cell;

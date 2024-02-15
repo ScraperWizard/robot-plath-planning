@@ -6,8 +6,6 @@ enum RobotLookingAngles {
   LEFT = 270,
 }
 
-
-
 export {
     RobotLookingAngles,
 }
